@@ -1,4 +1,5 @@
 ---
+// src/pages/index.astro
 import Layout from '../layouts/Layout.astro';
 import { createClient } from 'microcms-js-sdk'; // microCMS SDKをインポート
 import { format } from 'date-fns';
@@ -10,7 +11,8 @@ const client = createClient({
 });
 
 // pages APIから単一コンテンツを取得
-const pageContent = await client.get({ endpoint: 'pages' });
+// このAPIエンドポイントが「ホーム」の情報を返すと仮定
+const pageContent = await client.get({ endpoint: 'pages', queries: { limit: 1 } }) // 通常、単一ページならlimit:1など
 
 // news APIから最新の情報を取得 (例: 最新3件)
 const newsList = await client.get({ endpoint: 'news', queries: { limit: 3, orders: '-publishedAt' } });
@@ -19,136 +21,213 @@ const newsList = await client.get({ endpoint: 'news', queries: { limit: 3, order
 function renderRichText(htmlString) {
   return htmlString ? { set: 'html', value: htmlString } : null;
 }
-
-// ページ内の各セクションを識別するためのマーク（HTMLコメント）
-// これらのマークを使って、pageContent.bodyから各セクションを抽出する想定
-// 例: // この処理はフロントエンドで複雑になるため、今回はbody全体を表示します。
-// 将来的にbodyをより細かくCMSで分割するか、JSでセクションごとに解析するなどの対応が必要になります。
 ---
-<Layout title="EnsoTechLab | 自然とAIが織りなす、持続可能な未来の農業">
-  <main>
-    <section class="hero-section">
-      <div class="container">
-        {pageContent.title && <h1>{pageContent.title}</h1>}
-        <div class="hero-body">
-          {renderRichText(pageContent.body)}
-        </div>
-      </div>
-    </section>
 
-    <section class="latest-news-section">
-      <div class="container">
-        <h2>最新情報</h2>
-        {newsList.contents && newsList.contents.length > 0 ? (
-          <div class="news-grid">
-            {newsList.contents.map((news) => (
-              <article class="news-item">
-                <h3><a href={`/news/${news.slug}`}>{news.title}</a></h3>
-                <p class="news-date">{format(new Date(news.publishedAt), 'yyyy.MM.dd')}</p>
-                {news.thumbnail && <img src={news.thumbnail.url} alt={news.title} class="news-thumbnail" />}
-                <p>{news.body.slice(0, 100)}...</p> {/* 冒頭を抜粋 */}
-                <a href={`/news/${news.slug}`} class="read-more">続きを読む</a>
-              </article>
-            ))}
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>未来を創造するエンソテックラボ</title> {/* ★ページのタイトルもここで設定★ */}
+  <style>
+    /* ========== 新しいヒーローセクションの背景画像とテキストスタイル ========== */
+    .hero-container {
+      position: relative;
+      width: 100%;
+      height: 100vh; /* 画面の高さいっぱいに広がる */
+      display: flex;
+      flex-direction: column; /* 要素を縦に並べる */
+      align-items: center;
+      justify-content: center;
+      background-image: url('/images/ai-nature-city.webp'); /* ★ここに保存した画像ファイルのパスを指定★ */
+      background-size: cover;
+      background-position: center center;
+      background-repeat: no-repeat;
+      background-attachment: fixed; /* スクロールしても背景を固定 */
+      color: white; /* ヒーローテキストの色 */
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7); /* 文字の視認性向上のための影 */
+      overflow: hidden; /* 子要素の溢れを防ぐ */
+    }
+
+    /* 背景画像の上に重ねる半透明のオーバーレイ */
+    .hero-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.3); /* 半透明の黒いオーバーレイで文字を読みやすくする */
+      z-index: 0; /* 背景画像のすぐ上に配置 */
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1; /* オーバーレイより手前に配置 */
+      text-align: center;
+      max-width: 900px; /* コンテンツの最大幅を制限 */
+      padding: 20px;
+    }
+
+    .hero-content h1 {
+      font-size: 3.8em; /* ヒーローの見出しを大きく */
+      margin-bottom: 0.4em;
+      line-height: 1.2;
+    }
+
+    .hero-content p {
+      font-size: 1.3em;
+      line-height: 1.7;
+      margin-bottom: 1.5em;
+    }
+
+    /* レスポンシブ対応 (スマートフォンの場合) */
+    @media (max-width: 768px) {
+      .hero-content h1 {
+        font-size: 2.8em;
+      }
+      .hero-content p {
+        font-size: 1.1em;
+      }
+      .hero-container {
+        background-size: auto 100%; /* 高さに合わせて画像を表示 */
+        background-position: center top; /* 上部に寄せて表示 */
+      }
+    }
+
+    /* ========== 既存のニュースセクションなどのスタイルはそのまま利用 ========== */
+    /* microCMSのコンテンツ表示のための共通スタイル */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    .latest-news-section {
+      padding: 60px 0;
+      background-color: #f8f8f8;
+      text-align: center;
+    }
+    .latest-news-section h2 {
+      font-size: 2em;
+      color: #2c3e50;
+      margin-bottom: 40px;
+    }
+    .news-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 30px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    .news-item {
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      padding: 20px;
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+    }
+    .news-item h3 {
+      font-size: 1.3em;
+      margin-bottom: 10px;
+    }
+    .news-item h3 a {
+      color: #34495e;
+      text-decoration: none;
+    }
+    .news-item h3 a:hover {
+      color: #007bff;
+    }
+    .news-item .news-date {
+      font-size: 0.9em;
+      color: #7f8c8d;
+      margin-bottom: 15px;
+    }
+    .news-item .news-thumbnail {
+      max-width: 100%;
+      height: auto;
+      border-radius: 4px;
+      margin-bottom: 15px;
+    }
+    .news-item p {
+      font-size: 0.95em;
+      line-height: 1.5;
+      color: #555;
+      flex-grow: 1;
+    }
+    .news-item .read-more {
+      display: inline-block;
+      margin-top: 15px;
+      color: #007bff;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .news-item .read-more:hover {
+      text-decoration: underline;
+    }
+    .text-center {
+      text-align: center;
+    }
+    .mt-4 {
+      margin-top: 40px;
+    }
+    .btn-primary {
+      display: inline-block;
+      background-color: #007bff;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 5px;
+      text-decoration: none;
+      font-weight: bold;
+      transition: background-color 0.3s ease;
+    }
+    .btn-primary:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <Layout title="EnsoTechLab | 自然とAIが織りなす、持続可能な未来の農業">
+    <main>
+      {/* 新しいヒーローセクション */}
+      <section class="hero-container">
+        <div class="hero-content">
+          <h1>未来を創造するエンソテックラボ</h1> {/* ★ここにご自身のキャッチコピーやサイト名を！★ */}
+          <p>テクノロジーと自然が調和する、新しい価値を創造します。</p>
+          <p>私たちのビジョンは、持続可能な未来の街づくりと、人々の豊かな生活をAIと共に実現することです。</p>
+          {/* microCMSのページコンテンツがあればここに表示することも可能 (現在Heroセクションでは固定文言) */}
+          {/* {pageContent.title && <h2>{pageContent.title}</h2>} */}
+          {/* {renderRichText(pageContent.body)} */}
+        </div>
+      </section>
+
+      {/* 既存のニュースセクション */}
+      <section class="latest-news-section">
+        <div class="container">
+          <h2>最新情報</h2>
+          {newsList.contents && newsList.contents.length > 0 ? (
+            <div class="news-grid">
+              {newsList.contents.map((news) => (
+                <article class="news-item">
+                  <h3><a href={`/news/${news.slug}`}>{news.title}</a></h3>
+                  <p class="news-date">{format(new Date(news.publishedAt), 'yyyy.MM.dd')}</p>
+                  {news.thumbnail && <img src={news.thumbnail.url} alt={news.title} class="news-thumbnail" />}
+                  <p>{news.body.slice(0, 100)}...</p> {/* 冒頭を抜粋 */}
+                  <a href={`/news/${news.slug}`} class="read-more">続きを読む</a>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <p>現在、新しいお知らせはありません。</p>
+          )}
+          <div class="text-center mt-4">
+            <a href="/news" class="btn-primary">すべてのお知らせを見る</a>
           </div>
-        ) : (
-          <p>現在、新しいお知らせはありません。</p>
-        )}
-        <div class="text-center mt-4">
-          <a href="/news" class="btn-primary">すべてのお知らせを見る</a>
         </div>
-      </div>
-    </section>
+      </section>
 
-  </main>
-</Layout>
-
-<style>
-  /* 基本的なスタイルはglobal.cssに記述。
-     ここではセクションごとのレイアウトや要素の調整 */
-  .hero-section {
-    background-color: #e0f2f7;
-    padding: 80px 0;
-    text-align: center;
-  }
-  .hero-section h1 {
-    font-size: 2.5em;
-    color: #2c3e50;
-    margin-bottom: 20px;
-  }
-  .hero-body p {
-    font-size: 1.1em;
-    line-height: 1.6;
-    max-width: 800px;
-    margin: 0 auto 30px;
-  }
-  .hero-body a {
-    color: #007bff;
-    text-decoration: none;
-    font-weight: bold;
-  }
-  .latest-news-section {
-    padding: 60px 0;
-    background-color: #f8f8f8;
-    text-align: center;
-  }
-  .latest-news-section h2 {
-    font-size: 2em;
-    color: #2c3e50;
-    margin-bottom: 40px;
-  }
-  .news-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 30px;
-    max-width: 1000px;
-    margin: 0 auto;
-  }
-  .news-item {
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-    padding: 20px;
-    text-align: left;
-    display: flex;
-    flex-direction: column;
-  }
-  .news-item h3 {
-    font-size: 1.3em;
-    margin-bottom: 10px;
-  }
-  .news-item h3 a {
-    color: #34495e;
-    text-decoration: none;
-  }
-  .news-item h3 a:hover {
-    color: #007bff;
-  }
-  .news-item .news-date {
-    font-size: 0.9em;
-    color: #7f8c8d;
-    margin-bottom: 15px;
-  }
-  .news-item .news-thumbnail {
-    max-width: 100%;
-    height: auto;
-    border-radius: 4px;
-    margin-bottom: 15px;
-  }
-  .news-item p {
-    font-size: 0.95em;
-    line-height: 1.5;
-    color: #555;
-    flex-grow: 1; /* 本文の長さが違ってもボタンの位置を揃える */
-  }
-  .news-item .read-more {
-    display: inline-block;
-    margin-top: 15px;
-    color: #007bff;
-    text-decoration: none;
-    font-weight: bold;
-  }
-  .news-item .read-more:hover {
-    text-decoration: underline;
-  }
-</style>
+    </main>
+  </Layout>
+</body>
+</html>
