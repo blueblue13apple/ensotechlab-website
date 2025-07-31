@@ -29,3 +29,55 @@ const { title, description = 'EnsoTechLabの公式ウェブサイト。自然と
     <Footer />
   </body>
 </html>
+<style is:global>
+    :root {
+    --accent: 136, 58, 234;
+    --accent-light: 224, 204, 250;
+    --accent-dark: 49, 10, 101;
+    --accent-gradient: linear-gradient(
+      45deg,
+      rgb(var(--accent)),
+      rgb(var(--accent-light)) 30%,
+      white 60%
+    );
+  }
+  html {
+    font-family: system-ui, sans-serif;
+    background-color: #F6F6F6;
+  }
+  code {
+    font-family:
+      Menlo,
+      Monaco,
+      Lucida Console,
+      Liberation Mono,
+      DejaVu Sans Mono,
+      Bitstream Vera Sans Mono,
+      Courier New,
+      monospace;
+  }
+  .container { /* レイアウトの共通クラスは残す */
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+  .text-center { /* 共通のテキスト中央揃え */
+    text-align: center;
+  }
+  .mt-4 { /* 共通のマージントップ */
+    margin-top: 40px;
+  }
+  .btn-primary { /* 共通のボタン */
+    display: inline-block;
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+  }
+  .btn-primary:hover {
+    background-color: #0056b3;
+  }
+</style>
