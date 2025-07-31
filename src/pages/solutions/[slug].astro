@@ -1,0 +1,116 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { createClient } from 'microcms-js-sdk';
+
+const client = createClient({
+  serviceDomain: import.meta.env.MICROCMS_SERVICE_DOMAIN,
+  apiKey: import.meta.env.MICROCMS_API_KEY,
+});
+
+// プリレンダリングのためのパスを生成
+export async function getStaticPaths() {
+  const { contents: solutions } = await client.get({ endpoint: 'solutions', queries: { limit: 100 } }); // 全ソリューションを取得
+
+  return solutions.map((solution) => ({
+    params: { slug: solution.slug },
+  }));
+}
+
+// 個別のソリューションデータを取得
+const { slug } = Astro.params;
+const solution = await client.get({
+  endpoint: 'solutions',
+  contentId: slug, // スラッグをcontentIdとして使用
+});
+
+function renderRichText(htmlString) {
+  return htmlString ? { set: 'html', value: htmlString } : null;
+}
+---
+<Layout title={`${solution.solutionName} | EnsoTechLab`}>
+  <main>
+    <section class="solution-detail-hero-section">
+      <div class="container text-center">
+        <h1>{solution.solutionName}</h1>
+      </div>
+    </section>
+
+    <section class="solution-detail-content-section">
+      <div class="container">
+        {solution.image && <img src={solution.image.url} alt={solution.solutionName} class="main-solution-image" />}
+
+        <div class="overview-detail">
+          <h2>概要</h2>
+          {renderRichText(solution.overview)}
+        </div>
+
+        <div class="features-detail">
+          <h2>特徴</h2>
+          {renderRichText(solution.features)}
+        </div>
+
+        <div class="back-link">
+          <a href="/solutions" class="btn-back">ソリューション一覧に戻る</a>
+        </div>
+      </div>
+    </section>
+  </main>
+</Layout>
+
+<style>
+  .solution-detail-hero-section {
+    background-color: #e6f7ff;
+    padding: 60px 0;
+    text-align: center;
+  }
+  .solution-detail-hero-section h1 {
+    font-size: 2.5em;
+    color: #2c3e50;
+  }
+  .solution-detail-content-section {
+    padding: 60px 0;
+    line-height: 1.7;
+  }
+  .main-solution-image {
+    width: 100%;
+    max-height: 400px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 40px;
+  }
+  .overview-detail h2, .features-detail h2 {
+    font-size: 2em;
+    color: #2c3e50;
+    margin-top: 50px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 8px;
+  }
+  .overview-detail p, .features-detail p, .features-detail ul {
+    margin-bottom: 15px;
+  }
+  .features-detail ul {
+    list-style: disc;
+    margin-left: 25px;
+  }
+  .features-detail li {
+    margin-bottom: 8px;
+  }
+  .back-link {
+    text-align: center;
+    margin-top: 60px;
+  }
+  .btn-back {
+    display: inline-block;
+    background-color: #007bff;
+    color: #fff;
+    padding: 12px 25px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+  }
+  .btn-back:hover {
+    background-color: #0056b3;
+  }
+</style>

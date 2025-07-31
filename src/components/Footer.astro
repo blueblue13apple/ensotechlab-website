@@ -1,0 +1,57 @@
+---
+---
+<footer>
+  <div class="container">
+    <p>&copy; {new Date().getFullYear()} EnsoTechLab. All rights reserved.</p>
+    <nav class="footer-nav">
+      <ul>
+        <li><a href="/privacy-policy">プライバシーポリシー</a></li>
+        <li><a href="/terms-of-service">利用規約</a></li>
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+<style>
+  footer {
+    background-color: #34495e;
+    color: #ecf0f1;
+    padding: 40px 0;
+    text-align: center;
+    font-size: 0.9em;
+  }
+  footer .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+  footer p {
+    margin-bottom: 15px;
+  }
+  .footer-nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap; /* 小画面で折り返す */
+  }
+  .footer-nav li {
+    margin: 0 15px;
+  }
+  .footer-nav a {
+    color: #ecf0f1;
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+  .footer-nav a:hover {
+    color: #007bff;
+  }
+
+  /* レスポンシブ対応 */
+  @media (max-width: 768px) {
+    .footer-nav li {
+      margin: 5px 10px;
+    }
+  }
+</style>

@@ -1,0 +1,75 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { createClient } from 'microcms-js-sdk';
+
+const client = createClient({
+  serviceDomain: import.meta.env.MICROCMS_SERVICE_DOMAIN,
+  apiKey: import.meta.env.MICROCMS_API_KEY,
+});
+
+const pageContent = await client.get({ endpoint: 'pages' });
+
+function renderRichText(htmlString) {
+  return htmlString ? { set: 'html', value: htmlString } : null;
+}
+
+// '私たちについて'セクションの特定の部分を抽出するため、
+// HTMLコメントを区切りとして使用（例: ）
+// 実際には、body全体から正規表現などで抽出する、またはCMS側でフィールドを分けるのが理想的です。
+// 今回はシンプルにbody全体を表示します。
+---
+<Layout title="私たちについて | EnsoTechLab">
+  <main>
+    <section class="about-hero-section">
+      <div class="container text-center">
+        <h1>私たちについて</h1>
+        <p>EnsoTechLabのビジョン、物語、そして拠点をご紹介します。</p>
+      </div>
+    </section>
+
+    <section class="about-content-section">
+      <div class="container">
+        {renderRichText(pageContent.body)}
+      </div>
+    </section>
+  </main>
+</Layout>
+
+<style>
+  .about-hero-section {
+    background-color: #f0f8ff;
+    padding: 60px 0;
+    text-align: center;
+  }
+  .about-hero-section h1 {
+    font-size: 2.2em;
+    color: #2c3e50;
+    margin-bottom: 10px;
+  }
+  .about-hero-section p {
+    font-size: 1.1em;
+    color: #555;
+  }
+  .about-content-section {
+    padding: 60px 0;
+    line-height: 1.7;
+  }
+  .about-content-section h2, .about-content-section h3 {
+    color: #2c3e50;
+    margin-top: 40px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 5px;
+  }
+  .about-content-section p {
+    margin-bottom: 15px;
+  }
+  .about-content-section ul {
+    list-style: disc;
+    margin-left: 25px;
+    margin-bottom: 15px;
+  }
+  .about-content-section li {
+    margin-bottom: 8px;
+  }
+</style>

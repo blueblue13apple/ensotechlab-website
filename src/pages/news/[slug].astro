@@ -1,0 +1,110 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { createClient } from 'microcms-js-sdk';
+import { format } from 'date-fns';
+
+const client = createClient({
+  serviceDomain: import.meta.env.MICROCMS_SERVICE_DOMAIN,
+  apiKey: import.meta.env.MICROCMS_API_KEY,
+});
+
+// プリレンダリングのためのパスを生成
+export async function getStaticPaths() {
+  const { contents: newsList } = await client.get({ endpoint: 'news', queries: { limit: 100 } }); // 全ニュースを取得
+
+  return newsList.map((news) => ({
+    params: { slug: news.slug },
+  }));
+}
+
+// 個別のニュースデータを取得
+const { slug } = Astro.params;
+const news = await client.get({
+  endpoint: 'news',
+  contentId: slug, // スラッグをcontentIdとして使用
+});
+
+function renderRichText(htmlString) {
+  return htmlString ? { set: 'html', value: htmlString } : null;
+}
+---
+<Layout title={`${news.title} | EnsoTechLab`}>
+  <main>
+    <section class="news-detail-hero-section">
+      <div class="container text-center">
+        <h1>{news.title}</h1>
+        <p class="news-detail-date">{format(new Date(news.publishedAt), 'yyyy.MM.dd')}</p>
+      </div>
+    </section>
+
+    <section class="news-detail-content-section">
+      <div class="container">
+        {news.thumbnail && <img src={news.thumbnail.url} alt={news.title} class="main-news-thumbnail" />}
+        <div class="news-body-content">
+          {renderRichText(news.body)}
+        </div>
+        <div class="back-link">
+          <a href="/news" class="btn-back">お知らせ一覧に戻る</a>
+        </div>
+      </div>
+    </section>
+  </main>
+</Layout>
+
+<style>
+  .news-detail-hero-section {
+    background-color: #f0f0f0;
+    padding: 60px 0;
+    text-align: center;
+  }
+  .news-detail-hero-section h1 {
+    font-size: 2.5em;
+    color: #2c3e50;
+    margin-bottom: 10px;
+  }
+  .news-detail-hero-section .news-detail-date {
+    font-size: 1em;
+    color: #7f8c8d;
+  }
+  .news-detail-content-section {
+    padding: 60px 0;
+    line-height: 1.7;
+  }
+  .main-news-thumbnail {
+    width: 100%;
+    max-height: 350px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 40px;
+  }
+  .news-body-content h1, .news-body-content h2, .news-body-content h3 {
+    color: #2c3e50;
+    margin-top: 30px;
+    margin-bottom: 15px;
+  }
+  .news-body-content p {
+    margin-bottom: 1em;
+  }
+  .news-body-content ul, .news-body-content ol {
+    list-style: disc;
+    margin-left: 25px;
+    margin-bottom: 1em;
+  }
+  .back-link {
+    text-align: center;
+    margin-top: 60px;
+  }
+  .btn-back {
+    display: inline-block;
+    background-color: #007bff;
+    color: #fff;
+    padding: 12px 25px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+  }
+  .btn-back:hover {
+    background-color: #0056b3;
+  }
+</style>

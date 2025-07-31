@@ -1,0 +1,121 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { createClient } from 'microcms-js-sdk';
+import { format } from 'date-fns'; // 日付フォーマット用にインポート
+
+const client = createClient({
+  serviceDomain: import.meta.env.MICROCMS_SERVICE_DOMAIN,
+  apiKey: import.meta.env.MICROCMS_API_KEY,
+});
+
+const { contents: newsList } = await client.get({ endpoint: 'news', queries: { orders: '-publishedAt' } }); // 公開日降順で取得
+---
+<Layout title="ニュース | EnsoTechLab">
+  <main>
+    <section class="news-list-hero-section">
+      <div class="container text-center">
+        <h1>最新情報</h1>
+        <p>EnsoTechLabからのお知らせです。</p>
+      </div>
+    </section>
+
+    <section class="news-articles-section">
+      <div class="container">
+        {newsList && newsList.length > 0 ? (
+          <div class="news-grid-list">
+            {newsList.map((news) => (
+              <article class="news-list-item">
+                {news.thumbnail && <img src={news.thumbnail.url} alt={news.title} class="news-list-thumbnail" />}
+                <div class="news-list-content">
+                  <h2 class="news-list-title"><a href={`/news/${news.slug}`}>{news.title}</a></h2>
+                  <p class="news-list-date">{format(new Date(news.publishedAt), 'yyyy.MM.dd')}</p>
+                  <p>{news.body.slice(0, 150)}...</p> {/* 冒頭を抜粋 */}
+                  <a href={`/news/${news.slug}`} class="read-more-list">続きを読む</a>
+                </div>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <p class="text-center">現在、お知らせはありません。</p>
+        )}
+      </div>
+    </section>
+  </main>
+</Layout>
+
+<style>
+  .news-list-hero-section {
+    background-color: #f0f0f0;
+    padding: 60px 0;
+    text-align: center;
+  }
+  .news-list-hero-section h1 {
+    font-size: 2.2em;
+    color: #2c3e50;
+    margin-bottom: 10px;
+  }
+  .news-list-hero-section p {
+    font-size: 1.1em;
+    color: #555;
+  }
+  .news-articles-section {
+    padding: 60px 0;
+  }
+  .news-grid-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 40px;
+  }
+  .news-list-item {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .news-list-thumbnail {
+    width: 100%;
+    height: 200px; /* サムネイルの高さを固定 */
+    object-fit: cover;
+  }
+  .news-list-content {
+    padding: 20px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .news-list-title {
+    font-size: 1.4em;
+    margin-bottom: 10px;
+  }
+  .news-list-title a {
+    color: #34495e;
+    text-decoration: none;
+  }
+  .news-list-title a:hover {
+    color: #007bff;
+  }
+  .news-list-date {
+    font-size: 0.85em;
+    color: #7f8c8d;
+    margin-bottom: 15px;
+  }
+  .news-list-item p {
+    font-size: 0.95em;
+    line-height: 1.5;
+    color: #555;
+    margin-bottom: 15px;
+    flex-grow: 1;
+  }
+  .read-more-list {
+    display: inline-block;
+    color: #007bff;
+    text-decoration: none;
+    font-weight: bold;
+    margin-top: auto;
+  }
+  .read-more-list:hover {
+    text-decoration: underline;
+  }
+</style>
