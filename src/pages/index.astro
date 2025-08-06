@@ -4,6 +4,10 @@ import Layout from '../layouts/Layout.astro';
 import { createClient } from 'microcms-js-sdk';
 import { format } from 'date-fns';
 
+// ★追加★ microCMSの型定義をインポート
+import type { News, MicroCMSListResponse, PageContent } from '../../types/microcms';
+
+
 // ★重要★ Layout.astro からヘルパー関数をインポート
 import { renderHtmlContent, stripHtmlTags } from '../utils/string';
 
@@ -27,11 +31,20 @@ const newsList = await client.get({ endpoint: 'news', queries: { limit: 3, order
     {/* 新しいヒーローセクション */}
     <section class="hero-container">
       <div class="hero-content">
-        <h1>AIと人間が織りなす、<br>持続可能な未来の創造</h1>
-        <p>私たちEnsoTechLabは、AIテクノロジーと自然の調和を通じて、<br>人々と地球が共に豊かになる未来を追求します。</p>
-        <p>このホームページは、**AIと私の協業**によって実現しました。</p>
+        {/* ★修正★ microCMSから取得したHTMLを set:html でレンダリング */}
+        {homePageContent?.body ? (
+          <Fragment set:html={homePageContent.body} />
+        ) : (
+          // コンテンツがない場合のフォールバック
+          <>
+            <h1>AIと人間が織りなす、<br>持続可能な未来の創造</h1>
+            <p>私たちEnsoTechLabは、AIテクノロジーと自然の調和を通じて、<br>人々と地球が共に豊かになる未来を追求します。</p>
+          </>
+        )}
       </div>
     </section>
+
+    
 
     {/* 既存のニュースセクション */}
     <section class="latest-news-section">
@@ -39,7 +52,7 @@ const newsList = await client.get({ endpoint: 'news', queries: { limit: 3, order
         <h2>最新情報</h2>
         {newsList.contents && newsList.contents.length > 0 ? (
           <div class="news-grid">
-            {newsList.contents.map((news) => (
+            {newsList.contents.map((news: News) => (
               <article class="news-item">
                 <h3><a href={`/news/${news.slug}`}>{news.title}</a></h3>
                 <p class="news-date">{format(new Date(news.publishedAt), 'yyyy.MM.dd')}</p>
