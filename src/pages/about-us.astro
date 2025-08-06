@@ -1,75 +1,132 @@
 ---
+// src/pages/about-us.astro
 import Layout from '../layouts/Layout.astro';
 import { createClient } from 'microcms-js-sdk';
 
+// renderHtmlContent はもう必要ないので、インポートから削除します。
+// import { renderHtmlContent } from '../utils/string'; 
+
+// microCMSクライアントの初期化
 const client = createClient({
   serviceDomain: import.meta.env.MICROCMS_SERVICE_DOMAIN,
   apiKey: import.meta.env.MICROCMS_API_KEY,
 });
 
-const pageContent = await client.get({ endpoint: 'pages' });
+// microCMSから '私たちについて' のコンテンツを取得
+const response = await client.get({
+  endpoint: 'pages',
+  queries: { filters: 'slug[equals]about-us' }
+});
+const pageContent = response.contents[0] || null;
 
-function renderRichText(htmlString) {
-  return htmlString ? { set: 'html', value: htmlString } : null;
+// pageContentが取得できなかった場合のフォールバック
+if (!pageContent) {
+  // 例えば、404ページにリダイレクトするか、エラーメッセージを表示する
+  // return Astro.redirect('/404'); // 必要であればコメントアウトを外す
 }
-
-// '私たちについて'セクションの特定の部分を抽出するため、
-// HTMLコメントを区切りとして使用（例: ）
-// 実際には、body全体から正規表現などで抽出する、またはCMS側でフィールドを分けるのが理想的です。
-// 今回はシンプルにbody全体を表示します。
 ---
+
 <Layout title="私たちについて | EnsoTechLab">
-  <main>
+  <main> {/* mainタグで囲むことで、セマンティックな構造を保ちます */}
     <section class="about-hero-section">
       <div class="container text-center">
         <h1>私たちについて</h1>
-        <p>EnsoTechLabのビジョン、物語、そして拠点をご紹介します。</p>
+        <p>EnsoTechLabのビジョン、物語、そして八ヶ岳を拠点とした取り組みをご紹介します。</p>
       </div>
     </section>
 
     <section class="about-content-section">
       <div class="container">
-        {renderRichText(pageContent.body)}
+        {/* ★ここが最も重要です★ */}
+        {/* pageContent.body に含まれるHTML文字列を、Astroの set:html ディレクティブを使ってそのままHTMLとしてレンダリングします。 */}
+        {/* Fragment は余計なDOM要素を追加しないためのラッパーです。 */}
+        {pageContent.body ? (
+          <Fragment set:html={pageContent.body} />
+        ) : (
+          <p>コンテンツが読み込めませんでした。</p>
+        )}
       </div>
     </section>
   </main>
 </Layout>
 
 <style>
+  /* 共通スタイルは Layout.astro の is:global で管理されています */
+
+  /* ここはabout-usページ独自のスタイルを記述します */
   .about-hero-section {
-    background-color: #f0f8ff;
-    padding: 60px 0;
+    background-color: var(--primary-color); /* メインカラーを使用 */
+    color: white;
+    padding: 80px 20px;
     text-align: center;
   }
+
   .about-hero-section h1 {
-    font-size: 2.2em;
-    color: #2c3e50;
-    margin-bottom: 10px;
+    font-size: 3em;
+    margin-bottom: 15px;
   }
+
   .about-hero-section p {
-    font-size: 1.1em;
-    color: #555;
+    font-size: 1.2em;
+    max-width: 800px;
+    margin: 0 auto;
+    line-height: 1.6;
   }
+
   .about-content-section {
-    padding: 60px 0;
-    line-height: 1.7;
+    padding: 60px 20px;
+    background-color: var(--background-color-light);
+    line-height: 1.8; /* 読みやすさのために行間を調整 */
   }
-  .about-content-section h2, .about-content-section h3 {
-    color: #2c3e50;
+
+  .about-content-section h2 {
+    font-size: 2.2em;
+    color: var(--heading-color);
     margin-top: 40px;
     margin-bottom: 20px;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 5px;
+    border-bottom: 2px solid var(--border-color); /* 下線を追加 */
+    padding-bottom: 10px;
   }
+
+  .about-content-section h3 {
+    font-size: 1.8em;
+    color: var(--heading-color);
+    margin-top: 30px;
+    margin-bottom: 15px;
+  }
+
   .about-content-section p {
-    margin-bottom: 15px;
+    margin-bottom: 20px;
+    color: var(--text-color);
   }
+
   .about-content-section ul {
-    list-style: disc;
-    margin-left: 25px;
-    margin-bottom: 15px;
+    list-style: disc; /* 通常の黒丸リスト */
+    margin-left: 25px; /* 左側にインデント */
+    margin-bottom: 20px;
   }
+
   .about-content-section li {
-    margin-bottom: 8px;
+    margin-bottom: 10px;
+    color: var(--text-color);
+  }
+
+  /* レスポンシブ対応 */
+  @media (max-width: 768px) {
+    .about-hero-section {
+      padding: 60px 20px;
+    }
+    .about-hero-section h1 {
+      font-size: 2.2em;
+    }
+    .about-hero-section p {
+      font-size: 1em;
+    }
+    .about-content-section h2 {
+      font-size: 1.8em;
+    }
+    .about-content-section h3 {
+      font-size: 1.4em;
+    }
   }
 </style>

@@ -1,3 +1,6 @@
+/* src/styles/global.css */
+
+/* CSS変数定義をファイルの先頭に */
 :root {
   --primary-color: #007bff; /* 青系 */
   --secondary-color: #6c757d; /* 灰色系 */
@@ -30,13 +33,27 @@ input, button, textarea, select {
   font: inherit;
 }
 
-/* 基本フォントと背景色 */
+/* HTMLとBodyの基本スタイルとSticky Footerのための設定をここに集約 */
+html {
+  height: 100%; /* htmlも高さを100%に */
+}
+
 body {
-  font-family: 'Noto Sans JP', sans-serif;
+  height: 100%; /* bodyも高さを100%に */
+  display: flex;
+  flex-direction: column; /* 縦方向に要素を並べる */
+  min-height: 100vh; /* 画面の高さ以上を確保 */
+  font-family: 'Noto Sans JP', sans-serif; /* bodyにもフォントを適用 */
   line-height: 1.5;
   color: var(--text-color);
   background-color: #fff; /* 全体の背景は白 */
   -webkit-font-smoothing: antialiased;
+  padding-top: 70px; /* ヘッダーの高さ分 */
+  margin: 0;
+}
+
+main { /* メインコンテンツエリアのflex設定 */
+  flex-grow: 1; /* 残りのスペースを埋める */
 }
 
 /* コンテナ */

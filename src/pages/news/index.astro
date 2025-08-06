@@ -1,16 +1,23 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import { createClient } from 'microcms-js-sdk';
-import { format } from 'date-fns'; // 日付フォーマット用にインポート
+import { format } from 'date-fns';
+import { stripHtmlTags } from '../../utils/string'; // ★HTMLタグ除去ユーティリティをインポート
+import type { News, MicroCMSListResponse } from '../../types/microcms.d.ts'; // ★型定義をインポート
 
+// microCMSクライアントの初期化
 const client = createClient({
   serviceDomain: import.meta.env.MICROCMS_SERVICE_DOMAIN,
   apiKey: import.meta.env.MICROCMS_API_KEY,
 });
 
-const { contents: newsList } = await client.get({ endpoint: 'news', queries: { orders: '-publishedAt' } }); // 公開日降順で取得
+// `microcms-js-sdk`からのレスポンスに型を付与
+const { contents: newsList } = await client.get<MicroCMSListResponse<News>>({
+  endpoint: 'news',
+  queries: { orders: '-publishedAt' }
+});
 ---
-<Layout title="ニュース | EnsoTechLab">
+<Layout title="最新情報 | EnsoTechLab">
   <main>
     <section class="news-list-hero-section">
       <div class="container text-center">
@@ -29,7 +36,7 @@ const { contents: newsList } = await client.get({ endpoint: 'news', queries: { o
                 <div class="news-list-content">
                   <h2 class="news-list-title"><a href={`/news/${news.slug}`}>{news.title}</a></h2>
                   <p class="news-list-date">{format(new Date(news.publishedAt), 'yyyy.MM.dd')}</p>
-                  <p>{news.body.slice(0, 150)}...</p> {/* 冒頭を抜粋 */}
+                  <p>{stripHtmlTags(news.body).slice(0, 150)}...</p>
                   <a href={`/news/${news.slug}`} class="read-more-list">続きを読む</a>
                 </div>
               </article>
@@ -76,7 +83,7 @@ const { contents: newsList } = await client.get({ endpoint: 'news', queries: { o
   }
   .news-list-thumbnail {
     width: 100%;
-    height: 200px; /* サムネイルの高さを固定 */
+    height: 200px;
     object-fit: cover;
   }
   .news-list-content {
