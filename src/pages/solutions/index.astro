@@ -1,17 +1,18 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import { createClient } from 'microcms-js-sdk';
+import type { Solutions, MicroCMSListResponse } from '../../types/microcms.d.ts';
 
 const client = createClient({
   serviceDomain: import.meta.env.MICROCMS_SERVICE_DOMAIN,
   apiKey: import.meta.env.MICROCMS_API_KEY,
 });
 
-const { contents: solutions } = await client.get({ endpoint: 'solutions', queries: { orders: 'publishedAt' } }); // 必要に応じてソート順を変更
-
-function renderRichText(htmlString) {
-  return htmlString ? { set: 'html', value: htmlString } : null;
-}
+// ★修正★: 型定義を追加
+const { contents: solutions } = await client.get<MicroCMSListResponse<Solutions>>({
+  endpoint: 'solutions',
+  queries: { orders: '-publishedAt' } // 新しい順に並び替え
+});
 ---
 <Layout title="ソリューション | EnsoTechLab">
   <main>
@@ -32,7 +33,7 @@ function renderRichText(htmlString) {
                 <div class="solution-content">
                   <h2><a href={`/solutions/${solution.slug}`}>{solution.solutionName}</a></h2>
                   <div class="overview-text">
-                    {renderRichText(solution.overview)}
+                    <div set:html={solution.overview} />
                   </div>
                   <a href={`/solutions/${solution.slug}`} class="btn-secondary">詳細を見る</a>
                 </div>
@@ -77,6 +78,11 @@ function renderRichText(htmlString) {
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .solution-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
   }
   .solution-thumbnail {
     width: 100%;
@@ -101,7 +107,8 @@ function renderRichText(htmlString) {
   .solution-content h2 a:hover {
     color: #007bff;
   }
-  .overview-text p { /* microCMSリッチエディタのpタグに影響 */
+  /* ★修正★: overview-text内のpタグに影響するスタイルを調整 */
+  .overview-text :global(p) {
     font-size: 0.95em;
     line-height: 1.6;
     color: #555;
@@ -116,7 +123,7 @@ function renderRichText(htmlString) {
     border-radius: 5px;
     text-decoration: none;
     transition: background-color 0.3s ease;
-    margin-top: auto; /* ボタンを下に揃える */
+    margin-top: auto;
   }
   .btn-secondary:hover {
     background-color: #5a6268;

@@ -1,65 +1,68 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import { createClient } from 'microcms-js-sdk';
-import { format } from 'date-fns';
-import { stripHtmlTags } from '../../utils/string';
-import type { News, MicroCMSListResponse } from '../../types/microcms.d.ts';
+// ★修正★ ファイルパスとインポートの型名を再確認
+import type { Solutions, MicroCMSListResponse } from '../../types/microcms.d.ts';
 
-export const prerender = true;
+// `getStaticPaths`は静的サイト生成に必要な関数です
+export async function getStaticPaths() {
+  const client = createClient({
+    serviceDomain: import.meta.env.MICROCMS_SERVICE_DOMAIN,
+    apiKey: import.meta.env.MICROCMS_API_KEY,
+  });
 
+  const solutionsResponse = await client.get<MicroCMSListResponse<Solutions>>({
+    endpoint: 'solutions',
+    queries: { limit: 100 }
+  });
+
+  if (!solutionsResponse || !solutionsResponse.contents) {
+    return [];
+  }
+
+  // ★修正★ `solution`パラメータに型を明示
+  return solutionsResponse.contents.map((solution: Solutions) => ({
+    params: { slug: solution.slug },
+  }));
+}
+
+// ページのレンダリング部分で使用するためのclient
 const client = createClient({
   serviceDomain: import.meta.env.MICROCMS_SERVICE_DOMAIN,
   apiKey: import.meta.env.MICROCMS_API_KEY,
 });
 
-export async function getStaticPaths() {
-  const newsResponse = await client.get<MicroCMSListResponse<News>>({
-    endpoint: 'news',
-    queries: { limit: 100 }
-  });
-
-  if (!newsResponse || !newsResponse.contents) {
-    return [];
-  }
-
-  return newsResponse.contents.map((news) => ({
-    params: { slug: news.slug },
-  }));
-}
-
 const { slug } = Astro.params;
-let newsArticle;
+let solutionArticle;
+
 try {
-  newsArticle = await client.get<News>({
-    endpoint: 'news',
-    contentId: slug,
+  const response = await client.get<MicroCMSListResponse<Solutions>>({
+    endpoint: 'solutions',
+    queries: { filters: `slug[equals]${slug}` }
   });
+  solutionArticle = response.contents[0];
 } catch (error) {
-  // エラーが発生した場合も404にリダイレクト
-  console.error(`Failed to fetch news article for slug: ${slug}`, error);
+  console.error(`Failed to fetch solution article for slug: ${slug}`, error);
   return Astro.redirect('/404');
 }
 
-if (!newsArticle) {
+if (!solutionArticle) {
   return Astro.redirect('/404');
 }
 ---
-<Layout title={`${newsArticle.title} | EnsoTechLab`}>
+
+<Layout title={`${solutionArticle.solutionName} | EnsoTechLab`}>
   <main>
-    <section class="news-detail-container">
+    <section class="solution-detail-container">
       <div class="container">
-        <article class="news-article">
-          <h1 class="news-title">{newsArticle.title}</h1>
-          <p class="news-date">{format(new Date(newsArticle.publishedAt), 'yyyy.MM.dd')}</p>
-
-          {newsArticle.thumbnail && (
-            <img src={newsArticle.thumbnail.url} alt={newsArticle.title} class="news-thumbnail" />
+        <article class="solution-article">
+          <h1 class="solution-title">{solutionArticle.solutionName}</h1>
+          {solutionArticle.image && (
+            <img src={solutionArticle.image.url} alt={solutionArticle.solutionName} class="solution-image" />
           )}
-
-          <div class="news-body" set:html={newsArticle.body} />
-
+          <div class="solution-body" set:html={solutionArticle.body} />
           <div class="back-link">
-            <a href="/news" class="btn-back">最新情報一覧に戻る</a>
+            <a href="/solutions" class="btn-back">ソリューション一覧に戻る</a>
           </div>
         </article>
       </div>
@@ -68,10 +71,10 @@ if (!newsArticle) {
 </Layout>
 
 <style>
-  .news-detail-container {
+  .solution-detail-container {
     padding: 60px 20px;
   }
-  .news-article {
+  .solution-article {
     max-width: 800px;
     margin: 0 auto;
     background-color: var(--background-color-light);
@@ -79,19 +82,13 @@ if (!newsArticle) {
     border-radius: 8px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   }
-  .news-title {
+  .solution-title {
     font-size: 2.5rem;
     font-weight: bold;
     color: var(--heading-color);
-    margin-bottom: 0.5rem;
+    margin-bottom: 1.5rem;
   }
-  .news-date {
-    font-size: 0.9rem;
-    color: var(--text-color-light);
-    margin-bottom: 2rem;
-    display: block;
-  }
-  .news-thumbnail {
+  .solution-image {
     width: 100%;
     height: auto;
     max-height: 400px;
@@ -99,35 +96,29 @@ if (!newsArticle) {
     border-radius: 8px;
     margin-bottom: 2rem;
   }
-  .news-body :global(h2),
-  .news-body :global(h3),
-  .news-body :global(p),
-  .news-body :global(ul),
-  .news-body :global(ol) {
+  .solution-body :global(h2),
+  .solution-body :global(h3),
+  .solution-body :global(p),
+  .solution-body :global(ul),
+  .solution-body :global(ol) {
     line-height: 1.8;
     margin-bottom: 1.5rem;
   }
-  .news-body :global(h2) {
+  .solution-body :global(h2) {
     font-size: 2rem;
     font-weight: bold;
     color: var(--heading-color);
     margin-top: 3rem;
   }
-  .news-body :global(h3) {
+  .solution-body :global(h3) {
     font-size: 1.5rem;
     font-weight: bold;
     color: var(--heading-color);
     margin-top: 2rem;
   }
-  .news-body :global(p) {
+  .solution-body :global(p) {
     font-size: 1rem;
     color: var(--text-color);
-  }
-  .news-body :global(img) {
-    max-width: 100%;
-    height: auto;
-    border-radius: 8px;
-    margin: 2rem 0;
   }
   .back-link {
     text-align: center;
@@ -146,9 +137,8 @@ if (!newsArticle) {
   .btn-back:hover {
     background-color: var(--primary-color);
   }
-
   @media (max-width: 768px) {
-    .news-title {
+    .solution-title {
       font-size: 2rem;
     }
   }

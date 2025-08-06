@@ -1,5 +1,22 @@
 // types/microcms.d.ts
 
+export type Solutions = {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+  publishedAt: string;
+  revisedAt: string;
+  solutionName: string;
+  slug: string;
+  image: {
+    url: string;
+    width: number;
+    height: number;
+  };
+  body: string;
+  // 他にfieldsで取得している項目があれば追加してください
+};
+
 // microCMSから取得するニュース記事の型定義
 export type News = {
   id: string;
