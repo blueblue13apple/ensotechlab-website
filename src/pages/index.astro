@@ -3,7 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import { createClient } from 'microcms-js-sdk';
 import { format } from 'date-fns';
 import { stripHtmlTags } from '../utils/string';
-import type { News, MicroCMSListResponse, PageContent } from '../../types/microcms';
+import type { News, MicroCMSListResponse, PageContent } from '../types/microcms.d.ts';
 
 const client = createClient({
   serviceDomain: import.meta.env.MICROCMS_SERVICE_DOMAIN,
@@ -14,7 +14,7 @@ const pageResponse = await client.get<MicroCMSListResponse<PageContent>>({
   endpoint: 'pages',
   queries: { filters: 'slug[equals]home' }
 });
-const homePageContent = pageResponse.contents[0] || null;
+const homePageContent: PageContent | null = pageResponse.contents[0] || null;
 
 const newsListResponse = await client.get<MicroCMSListResponse<News>>({
   endpoint: 'news',
@@ -74,7 +74,7 @@ const newsList: News[] = newsListResponse.contents || [];
   position: relative;
   width: 100%;
   padding: 80px 20px;
-  min-height: 70vh;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -158,8 +158,15 @@ const newsList: News[] = newsListResponse.contents || [];
   --accent-color: #aaffd6;
 }
 
-/* ★★★ 以下のスタイルを追加・修正 ★★★ */
-
+.latest-news-section {
+  padding: 60px 0;
+}
+.latest-news-section h2 {
+  font-size: 2em;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 40px;
+}
 .news-list-container {
   display: flex;
   flex-direction: column;
