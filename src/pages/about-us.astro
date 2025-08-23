@@ -1,5 +1,4 @@
 ---
-// src/pages/about-us.astro
 import Layout from '../layouts/Layout.astro';
 import { createClient } from 'microcms-js-sdk';
 
@@ -12,10 +11,10 @@ const client = createClient({
   apiKey: import.meta.env.MICROCMS_API_KEY,
 });
 
-// microCMSから '私たちについて' のコンテンツを取得
+// microCMSから '企業理念' のコンテンツを取得
 const response = await client.get({
   endpoint: 'pages',
-  queries: { filters: 'slug[equals]about-us' }
+  queries: { filters: 'slug[equals]corporate-philosophy' }
 });
 const pageContent = response.contents[0] || null;
 
@@ -26,20 +25,20 @@ if (!pageContent) {
 }
 ---
 
-<Layout title="私たちについて | EnsoTechLab">
-  <main> {/* mainタグで囲むことで、セマンティックな構造を保ちます */}
+<Layout title="企業理念 | オプティエンス">
+  <main>
     <section class="about-hero-section">
-      <div class="container text-center">
-        <h1>私たちについて</h1>
-        <p>EnsoTechLabのビジョン、物語、そして八ヶ岳を拠点とした取り組みをご紹介します。</p>
+      <video src="/videos/企業理念に基づく動画生成.mp4" autoplay loop muted playsinline></video>
+      <div class="hero-content">
+        <div class="container text-center">
+          <h1>企業理念</h1>
+          <p>私たちの指針をご紹介いたします。</p>
+        </div>
       </div>
     </section>
 
     <section class="about-content-section">
       <div class="container">
-        {/* ★ここが最も重要です★ */}
-        {/* pageContent.body に含まれるHTML文字列を、Astroの set:html ディレクティブを使ってそのままHTMLとしてレンダリングします。 */}
-        {/* Fragment は余計なDOM要素を追加しないためのラッパーです。 */}
         {pageContent.body ? (
           <Fragment set:html={pageContent.body} />
         ) : (
@@ -53,20 +52,47 @@ if (!pageContent) {
 <style>
   /* 共通スタイルは Layout.astro の is:global で管理されています */
 
-  /* ここはabout-usページ独自のスタイルを記述します */
+  /* ここはcorporate-philosophyページ独自のスタイルを記述します */
   .about-hero-section {
-    background-color: var(--primary-color); /* メインカラーを使用 */
+    position: relative;
+    overflow: hidden;
+    height: auto;
+    min-height: 400px;
     color: white;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .about-hero-section video {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    transform: translateX(-50%) translateY(-50%);
+    z-index: -1;
+    object-fit: cover;
+  }
+
+  .hero-content {
+    position: relative;
     padding: 80px 20px;
     text-align: center;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
   }
 
-  .about-hero-section h1 {
+  .hero-content h1 {
     font-size: 3em;
     margin-bottom: 15px;
+    color: white;
   }
 
-  .about-hero-section p {
+  .hero-content p {
     font-size: 1.2em;
     max-width: 800px;
     margin: 0 auto;
@@ -76,7 +102,7 @@ if (!pageContent) {
   .about-content-section {
     padding: 60px 20px;
     background-color: var(--background-color-light);
-    line-height: 1.8; /* 読みやすさのために行間を調整 */
+    line-height: 1.8;
   }
 
   .about-content-section h2 {
@@ -84,7 +110,7 @@ if (!pageContent) {
     color: var(--heading-color);
     margin-top: 40px;
     margin-bottom: 20px;
-    border-bottom: 2px solid var(--border-color); /* 下線を追加 */
+    border-bottom: 2px solid var(--border-color);
     padding-bottom: 10px;
   }
 
@@ -101,8 +127,8 @@ if (!pageContent) {
   }
 
   .about-content-section ul {
-    list-style: disc; /* 通常の黒丸リスト */
-    margin-left: 25px; /* 左側にインデント */
+    list-style: disc;
+    margin-left: 25px;
     margin-bottom: 20px;
   }
 
@@ -116,10 +142,13 @@ if (!pageContent) {
     .about-hero-section {
       padding: 60px 20px;
     }
-    .about-hero-section h1 {
+    .hero-content {
+      padding: 60px 20px;
+    }
+    .hero-content h1 {
       font-size: 2.2em;
     }
-    .about-hero-section p {
+    .hero-content p {
       font-size: 1em;
     }
     .about-content-section h2 {

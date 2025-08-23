@@ -1,14 +1,18 @@
 ---
+// ここにフロントマター（JavaScript）のコードがあればそのままにします。
 ---
+
 <header>
   <div class="container">
     <div class="logo">
-      <a href="/">Enso Tech Lab</a>
+      <a href="/">
+        <img src="/images/optiens-logo.png" alt="オプティエンスロゴ" class="header-logo" />
+      </a>
     </div>
     <nav>
       <ul>
         <li><a href="/">ホーム</a></li>
-        <li><a href="/about-us">私たちについて</a></li>
+        <li><a href="/about-us">企業理念</a></li>
         <li><a href="/solutions">ソリューション</a></li>
         <li><a href="/news">ニュース</a></li>
         <li><a href="/contact">お問い合わせ</a></li>
@@ -19,16 +23,15 @@
 
 <style>
   header {
-    /* ★変更点: 八ヶ岳の森林と空グラデーション */
-    background: linear-gradient(to right, #2e574c, #5ea89a); /* 左から右へ */
-    color: #fff; /* テキストは白 */
+    background: linear-gradient(to right, #2e574c, #5ea89a);
+    color: #fff;
     padding: 20px 0;
     position: fixed;
     width: 100%;
     top: 0;
     left: 0;
     z-index: 1000;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.3); /* 影を少し強めに */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   }
   header .container {
     display: flex;
@@ -39,10 +42,10 @@
     padding: 0 20px;
   }
   .logo a {
-    color: #fff; /* ロゴも白 */
-    text-decoration: none;
-    font-size: 1.8em;
-    font-weight: bold;
+    display: block;
+  }
+  .header-logo {
+    height: 80px; /* ロゴの高さを指定。必要に応じて調整してください */
   }
   nav ul {
     list-style: none;
@@ -54,18 +57,16 @@
     margin-left: 30px;
   }
   nav a {
-    color: #fff; /* ナビリンクも白 */
+    color: #fff;
     text-decoration: none;
     font-weight: bold;
     transition: color 0.3s ease;
   }
   nav a:hover {
-    /* ホバー時は global.css の --primary-color を使うか、別の鮮やかな色 */
-    color: var(--primary-color); /* 例: #007bff */
-    /* あるいは、もっと自然寄りの明るい色 #B0E0E6 (パウダーブルー) なども検討 */
+    color: var(--primary-color);
   }
 
-  /* レスポンシブ対応は変更なし */
+  /* レスポンシブ対応 */
   @media (max-width: 768px) {
     header .container {
       flex-direction: column;
